@@ -9,6 +9,8 @@ import numpy as np
 import os
 from imutils.video import VideoStream
 from importlib import reload
+import PIL
+from PIL import ImageFilter
 
 startTime = time.time()
 maxTime = 60
@@ -17,8 +19,11 @@ maxTime = 60
 
 #orange point: (2,174,188)
 
-orangeLower = (0,164,148)
-orangeUpper = (12,184,228)
+#orangeLower = (0,164,148)
+#orangeUpper = (12,184,228)
+
+orangeLower = (0,135,165)
+orangeUpper = (24,191,278)
 
 minRectSize = 10
 counter = 0
@@ -82,7 +87,7 @@ def processImage(image):
     objectLocation["x"] = hold_x
     objectLocation["y"] = hold_y
     
-    if len(cnts) > 0 and counter % 10 == 0:
+    if len(cnts) > 0 and counter % 1 == 0:
         # find the largest contour in the mask, then use
         # it to compute the minimum enclosing circle and
         # centroid
@@ -115,10 +120,10 @@ def processImage(image):
         hold_x = x
         hold_y = y
 
-    elif counter % 10 != 0:
-        cv2.rectangle(frame, (rect_x,rect_y) , (rect_x+rect_w,rect_y+rect_h) , (0,0,0) , 3)
-        cv2.line(frame, (int(rect_cx), int(rect_cy)), (int(rect_cx), int(rect_cy)), (255, 0, 0), thickness=10)
-        #cv2.rectangle(frame, (rect_cx,rect_cy) , (5,5) , (255,0,0) , 1)
+    #elif counter % 10 != 0:
+    #    cv2.rectangle(frame, (rect_x,rect_y) , (rect_x+rect_w,rect_y+rect_h) , (0,0,0) , 3)
+    #    cv2.line(frame, (int(rect_cx), int(rect_cy)), (int(rect_cx), int(rect_cy)), (255, 0, 0), thickness=10)
+    #    #cv2.rectangle(frame, (rect_cx,rect_cy) , (5,5) , (255,0,0) , 1)
     
     cv2.imshow('image', frame)
     key = cv2.waitKey(1) & 0xFF
@@ -133,8 +138,11 @@ def cozmo_program(robot: cozmo.robot.Robot):
     counter = 0
 
     while True: #loop images
-        image = robot.world.latest_image.raw_image        
-        processImage(image)
+        image = robot.world.latest_image.raw_image
+        sharpened1 = image.filter(ImageFilter.SHARPEN);
+        sharpened2 = sharpened1.filter(ImageFilter.SHARPEN);
+        
+        processImage(sharpened2)
 
         if counter % 1 == 0:
             if objectLocation["dx"] > 10 and objectLocation["dx"] < -10:

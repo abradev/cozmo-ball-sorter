@@ -4,15 +4,19 @@ import time
 import imutils
 import numpy as np
 from cozmo.util import degrees, distance_mm, speed_mmps
+import PIL
+from PIL import ImageFilter
 
 
 def empty(a):
     pass
 
+	
 cv2.namedWindow("Parameters")
 cv2.resizeWindow("Parameters",640,240)
 cv2.createTrackbar("Threshold1","Parameters",35,255,empty)
 cv2.createTrackbar("Threshold2","Parameters",45,255,empty)
+
 
 def getContours(img,imgContour):
     contours, hierarchy = cv2.findContours(img,cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_NONE)
@@ -24,14 +28,19 @@ def getContours(img,imgContour):
             approx = cv2.approxPolyDP(cnt,0.02*peri,True)
             x,y,w,h = cv2.boundingRect(approx)
             cv2.rectangle(imgContour,(x,y),(x+w, y+h), (0,255,0), 5)
+
+			
 def cozmo_program(robot: cozmo.robot.Robot):
     robot.camera.color_image_enabled = True #turn on color
     robot.camera.image_stream_enabled = True #turn on camera feed
 
     time.sleep(2) #allow time to initialize, VERY IMPORTANT
     while True: #loop images
-        image = robot.world.latest_image.raw_image 
-        frame = cv2.cvtColor(np.array(image), cv2.COLOR_RGB2BGR)
+        image = robot.world.latest_image.raw_image
+        sharpened1 = image.filter(ImageFilter.SHARPEN);
+        sharpened2 = sharpened1.filter(ImageFilter.SHARPEN);
+		
+        frame = cv2.cvtColor(np.array(sharpened2), cv2.COLOR_RGB2BGR)
         frame = cv2.resize(frame, (640, 480))
         imgContour = frame.copy()
         

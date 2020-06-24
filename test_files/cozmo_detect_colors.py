@@ -144,11 +144,6 @@ def cozmo_program(robot: cozmo.robot.Robot):
         
         processImage(sharpened2)
 
-        if counter % 1 == 0:
-            if objectLocation["dx"] > 10 and objectLocation["dx"] < -10:
-                print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
-            else:
-                print("CENTER CENTER CENTER CENTER CENTER CENTER")
         counter  += 1
         time.sleep(.05)
 

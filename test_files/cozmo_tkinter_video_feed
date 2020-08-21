@@ -1,0 +1,45 @@
+#using tkinter instead of opencv to display the cozmo view 
+import cozmo
+import cv2 
+import time
+import imutils
+import numpy as np
+from cozmo.util import degrees, distance_mm, speed_mmps
+import threading
+import tkinter as tk
+from PIL import Image
+from PIL import ImageTk
+
+window = tk.Tk()
+
+
+class Gui:
+    def __init__(self, robot: cozmo.robot.Robot):
+        robot.camera.color_image_enabled = True #turn on color
+        robot.camera.image_stream_enabled = True #turn on camera feed
+        print("initializing")
+        time.sleep(2)
+
+        self.canvas = tk.Canvas(window, width = 300, height = 300)      
+        self.canvas.pack()      
+              
+    def tkWindow(self,robot: cozmo.robot.Robot):
+        while True:
+            image = robot.world.latest_image.raw_image 
+            
+            frame = cv2.cvtColor(np.array(image), cv2.COLOR_RGB2BGR)
+            #frame = cv2.resize(frame, (640, 480))
+            frame = imutils.resize(frame, width=300)
+            im = Image.fromarray(frame)
+            self.final_im = ImageTk.PhotoImage(image)
+            self.canvas.create_image(20,20, anchor="nw", image=self.final_im)   
+            time.sleep(.05) 
+        cv2.destroyAllWindows()
+
+def cozmo_program(robot: cozmo.robot.Robot):
+    obj = Gui(robot) 
+    obj.tkWindow(robot)
+
+cozmoThread = threading.Thread(target=cozmo.run_program, args=[cozmo_program])
+cozmoThread.start()
+window.mainloop()

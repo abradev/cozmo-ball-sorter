@@ -1,5 +1,3 @@
-#now properly displays cozmo's video feed
-
 try:
     import tkinter as tk                # python 3
     from tkinter import font as tkfont  # python 3
@@ -16,6 +14,7 @@ import numpy as np
 from cozmo.util import degrees, distance_mm, speed_mmps
 from PIL import Image
 from PIL import ImageTk
+from PIL import ImageFilter
 
 class GUI(tk.Tk):
 
@@ -132,12 +131,15 @@ class CozmoReturnImage:
         time.sleep(2) 
               
     def cozmoGetImage(self,robot: cozmo.robot.Robot):
-        image = robot.world.latest_image.raw_image 
-        frame = cv2.cvtColor(np.array(image), cv2.COLOR_RGB2BGR)
-        frame = imutils.resize(frame, width=300)
-        self.final_im = ImageTk.PhotoImage(image)
+        image = robot.world.latest_image.raw_image
+        sharpened1 = image.filter(ImageFilter.SHARPEN)
+        npImage = np.array(sharpened1)
+        #print(npImage.shape[0])
+        #print(npImage.shape[1])
+        resizedImage = cv2.resize(npImage, dsize=(600, 450), interpolation=cv2.INTER_CUBIC) 
+        self.final_im = ImageTk.PhotoImage(Image.fromarray(resizedImage))
         return self.final_im
-        time.sleep(.05) 
+        time.sleep(.05)
 
 ''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 ballColorEntries = 0
@@ -201,9 +203,11 @@ class SetColorsPage(tk.Frame, CozmoReturnImage):
                 ballColorText.insert(1.0, text)
             else:
                 trayColorText.insert(1.0, text)
+       
+
         ''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
         self.frame_1_0_video_feed = tk.Frame(self)
-        self.canvas = tk.Canvas(self.frame_1_0_video_feed, width = 500, height = 300, bg="red")
+        self.canvas = tk.Canvas(self.frame_1_0_video_feed, width = 600, height = 450, bg="red")
         
 
         self.frame_1_0_video_feed.configure(bg="white",highlightbackground="black",highlightthickness=10)
@@ -300,9 +304,8 @@ class SetColorsPage(tk.Frame, CozmoReturnImage):
         ''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
     def displayFeed(self,robot: cozmo.robot.Robot):
         while True:
-        
-            self.canvas.create_image(20,20,anchor="nw",image=self.cozmoGetImage(robot))
-            self.canvas.configure(bg="green")
+            self.canvas.create_image(300,225,anchor="center",image=self.cozmoGetImage(robot))
+            self.canvas.configure(bg="lightblue")
             self.canvas.pack()
             time.sleep(.05) 
 
@@ -316,3 +319,4 @@ if __name__ == "__main__":
     cozmoThread = threading.Thread(target=cozmo.run_program, args=[cozmo_program])
     cozmoThread.start()
     gui.mainloop()
+

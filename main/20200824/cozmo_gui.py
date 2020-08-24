@@ -300,30 +300,18 @@ class SetColorsPage(tk.Frame, CozmoReturnImage):
         ''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
     def displayFeed(self,robot: cozmo.robot.Robot):
         while True:
-            print("setting image")
+        
             self.canvas.create_image(20,20,anchor="nw",image=self.cozmoGetImage(robot))
             self.canvas.configure(bg="green")
             self.canvas.pack()
             time.sleep(.05) 
 
-#def cozmo_program(robot: cozmo.robot.Robot):
-#    cozmoObj = Gui(robot) 
-#    cozmoObj.tkWindow(robot)
-
-#cozmoThread = threading.Thread(target=cozmo.run_program, args=[cozmo_program])
-#cozmoThread.start()
-
-#global gui
 def cozmo_program(robot: cozmo.robot.Robot):
     cozmoObj = CozmoReturnImage(robot)
     gui.setColorsObj.displayFeed(robot)
-    #displayObj = SetColorsPage(gui.parentHolder, gui.controllerHolder)
-    #displayObj.displayFeed(robot)
 
 if __name__ == "__main__":
-    #robot = cozmo.robot.Robot
     gui = GUI()
-
     gui.wm_geometry("800x800+300+100")
     cozmoThread = threading.Thread(target=cozmo.run_program, args=[cozmo_program])
     cozmoThread.start()
